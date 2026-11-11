@@ -19,6 +19,7 @@ import re
 import secrets
 import time
 from functools import wraps
+from flask_cors import CORS
 
 from bson import ObjectId
 from bson.errors import InvalidId
@@ -68,6 +69,16 @@ if not MONGO_URI:
     raise SystemExit("חסר MONGO_URI. העתק את .env.example ל-.env ומלא את הכתובת.")
 
 app = Flask(__name__)
+# כתובות שמורשות לפנות ל-API (ה-frontend ב-Render + פיתוח מקומי)
+FRONTEND_URL = "https://taskflow-attendance-management-1.onrender.com"
+ALLOWED_ORIGINS = [
+    o.strip()
+    for o in os.environ.get(
+        "ALLOWED_ORIGINS", f"{FRONTEND_URL},http://localhost:5173,http://127.0.0.1:5173"
+    ).split(",")
+    if o.strip()
+]
+CORS(app, origins=ALLOWED_ORIGINS)
 app.config["MAX_CONTENT_LENGTH"] = 1_000_000
 
 client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=8000)
